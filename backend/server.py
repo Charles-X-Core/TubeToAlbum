@@ -12,6 +12,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from core.downloader import TubeToAlbumDownloader
 from core.video_downloader import VideoDownloader
 from core.content_detector import ContentDetector
+from core.thumbnail import crop_to_square
+from core.metadata import MetadataWriter
 from utils.config_utils import load_config, save_config
 from utils.url_utils import is_youtube_url, sanitize_youtube_url
 
@@ -38,6 +40,36 @@ def load_history():
 def save_history(history):
     with open(HISTORY_PATH, 'w', encoding='utf-8') as f:
         json.dump(history, f, indent=2, ensure_ascii=False)
+
+
+def _crop_and_reembed_thumbnail(audio_path: str):
+    """Find the YouTube thumbnail sidecar file, crop to square, re-embed into audio."""
+    try:
+        base = os.path.splitext(audio_path)[0]
+        thumb_path = None
+        for ext in ['.jpg', '.webp', '.png']:
+            candidate = base + ext
+            if os.path.exists(candidate):
+                thumb_path = candidate
+                break
+
+        if not thumb_path:
+            return
+
+        with open(thumb_path, 'rb') as f:
+            thumb_data = f.read()
+
+        cropped = crop_to_square(thumb_data)
+
+        if cropped != thumb_data:
+            with open(thumb_path, 'wb') as f:
+                f.write(cropped)
+
+        writer = MetadataWriter(audio_path)
+        writer.write_thumbnail(cropped)
+        writer.save()
+    except Exception:
+        pass
 
 
 @app.route('/api/info', methods=['POST'])
@@ -146,6 +178,9 @@ def start_download():
 
                 info_downloader = TubeToAlbumDownloader({'quiet': True})
                 info = info_downloader.get_info(url)
+
+                if filepath and fmt != 'mp4' and os.path.exists(filepath):
+                    _crop_and_reembed_thumbnail(filepath)
 
                 file_size = 0
                 if filepath and os.path.exists(filepath):

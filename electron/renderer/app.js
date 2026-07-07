@@ -307,6 +307,9 @@ function pollProgress() {
                 showToast('Descarga completada!');
                 window.api.notify('TubeToAlbum', 'Descarga completada exitosamente');
                 resetUI();
+
+                // Reload history so it shows immediately when user clicks History tab
+                loadHistory();
             } else if (data.status === 'error') {
                 clearInterval(progressInterval);
                 showToast('Error: ' + data.error);

@@ -1,5 +1,7 @@
 import pytest
-from core.thumbnail import ThumbnailHandler
+from core.thumbnail import ThumbnailHandler, crop_to_square
+from PIL import Image
+import io
 
 
 class TestThumbnailHandler:
@@ -34,9 +36,6 @@ class TestThumbnailHandler:
         assert 'default' in self.handler.YOUTUBE_THUMBNAIL_URLS
 
     def test_resize_image(self):
-        from PIL import Image
-        import io
-
         img = Image.new('RGB', (1000, 1000), color='red')
         output = io.BytesIO()
         img.save(output, format='JPEG', quality=95)
@@ -47,3 +46,69 @@ class TestThumbnailHandler:
         resized_img = Image.open(io.BytesIO(resized))
         assert resized_img.width <= 500
         assert resized_img.height <= 500
+
+
+class TestCropToSquare:
+    def _make_image(self, w, h, color='red'):
+        img = Image.new('RGB', (w, h), color=color)
+        output = io.BytesIO()
+        img.save(output, format='JPEG', quality=95)
+        return output.getvalue()
+
+    def test_already_square(self):
+        data = self._make_image(500, 500, 'blue')
+        result = crop_to_square(data)
+        assert result == data
+
+    def test_landscape_16_9(self):
+        data = self._make_image(1920, 1080, 'green')
+        result = crop_to_square(data)
+        img = Image.open(io.BytesIO(result))
+        assert img.width == 1080
+        assert img.height == 1080
+
+    def test_portrait_9_16(self):
+        data = self._make_image(720, 1280, 'yellow')
+        result = crop_to_square(data)
+        img = Image.open(io.BytesIO(result))
+        assert img.width == 720
+        assert img.height == 720
+
+    def test_very_wide(self):
+        data = self._make_image(2000, 400, 'purple')
+        result = crop_to_square(data)
+        img = Image.open(io.BytesIO(result))
+        assert img.width == 400
+        assert img.height == 400
+
+    def test_very_tall(self):
+        data = self._make_image(300, 1500, 'orange')
+        result = crop_to_square(data)
+        img = Image.open(io.BytesIO(result))
+        assert img.width == 300
+        assert img.height == 300
+
+    def test_crop_is_center(self):
+        img = Image.new('RGB', (200, 100), color='black')
+        pixels = img.load()
+        pixels[100, 50] = (255, 0, 0)
+        output = io.BytesIO()
+        img.save(output, format='JPEG', quality=95)
+        data = output.getvalue()
+
+        result = crop_to_square(data)
+        result_img = Image.open(io.BytesIO(result))
+        assert result_img.width == 100
+        assert result_img.height == 100
+
+    def test_returns_bytes(self):
+        data = self._make_image(800, 600)
+        result = crop_to_square(data)
+        assert isinstance(result, bytes)
+        assert len(result) > 0
+
+    def test_output_is_jpeg(self):
+        data = self._make_image(800, 600)
+        result = crop_to_square(data)
+        img = Image.open(io.BytesIO(result))
+        assert img.format == 'JPEG'

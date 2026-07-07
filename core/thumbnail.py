@@ -66,3 +66,39 @@ class ThumbnailHandler:
     def save_thumbnail(self, image_data: bytes, filepath: str):
         with open(filepath, 'wb') as f:
             f.write(image_data)
+
+
+def crop_to_square(image_data: bytes) -> bytes:
+    img = Image.open(io.BytesIO(image_data))
+    w, h = img.size
+
+    if w == h:
+        return image_data
+
+    side = min(w, h)
+    left = (w - side) // 2
+    top = (h - side) // 2
+    right = left + side
+    bottom = top + side
+
+    cropped = img.crop((left, top, right, bottom))
+
+    output = io.BytesIO()
+    cropped.save(output, format='JPEG', quality=95)
+    return output.getvalue()
+
+
+def crop_thumbnail_file(filepath: str) -> bool:
+    try:
+        with open(filepath, 'rb') as f:
+            data = f.read()
+
+        cropped = crop_to_square(data)
+
+        if cropped != data:
+            with open(filepath, 'wb') as f:
+                f.write(cropped)
+            return True
+        return False
+    except Exception:
+        return False
