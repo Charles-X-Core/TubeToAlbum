@@ -125,25 +125,34 @@ def start_download():
                     vid_downloader = VideoDownloader(vid_config)
                     filepath = vid_downloader.download(url, progress_callback=progress_hook)
                 else:
+                    expanded_dir = os.path.expandvars(output_dir) if output_dir else ''
                     dl_config = {
                         'format': fmt,
                         'quality': quality,
                         'quiet': True,
-                        'non_music_output_dir': output_dir or os.path.expanduser('~/Downloads/TubeToAlbum'),
-                        'default_output_dir': output_dir or os.path.expanduser('~/Music'),
+                        'non_music_output_dir': expanded_dir or os.path.expanduser('~/Downloads/TubeToAlbum'),
+                        'default_output_dir': expanded_dir or os.path.expanduser('~/Music'),
                         'output_template': '%(artist|uploader)s/%(album|playlist)s/%(title)s.%(ext)s',
                     }
                     downloader = TubeToAlbumDownloader(dl_config)
                     filepath = downloader.download(url, progress_callback=progress_hook, is_music=is_music)
 
+                if filepath:
+                    filepath = os.path.normpath(filepath)
+
                 jobs[job_id]['filepath'] = filepath or ''
                 jobs[job_id]['status'] = 'completed'
                 jobs[job_id]['progress'] = 100
 
-                config = load_config()
-                info_url = url
                 info_downloader = TubeToAlbumDownloader({'quiet': True})
-                info = info_downloader.get_info(info_url)
+                info = info_downloader.get_info(url)
+
+                file_size = 0
+                if filepath and os.path.exists(filepath):
+                    try:
+                        file_size = os.path.getsize(filepath)
+                    except OSError:
+                        file_size = 0
 
                 entry = {
                     'title': info.get('title', 'Sin titulo') if info else 'Sin titulo',
@@ -151,7 +160,7 @@ def start_download():
                     'format': fmt.upper(),
                     'filepath': filepath or '',
                     'date': datetime.now().strftime('%Y-%m-%d %H:%M'),
-                    'size': os.path.getsize(filepath) if filepath and os.path.exists(filepath) else 0,
+                    'size': file_size,
                     'url': url,
                 }
                 history = load_history()

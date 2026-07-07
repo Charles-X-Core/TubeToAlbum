@@ -341,28 +341,60 @@ async function loadHistory() {
                 ? `${(entry.size / 1048576).toFixed(1)} MB`
                 : entry.size > 1024
                     ? `${(entry.size / 1024).toFixed(1)} KB`
-                    : `${entry.size} B`;
+                    : entry.size > 0 ? `${entry.size} B` : 'N/A';
 
             const fmtColor = entry.format === 'MP4' ? 'text-red-400' : 'text-emerald-400';
             const fmtBg = entry.format === 'MP4' ? 'bg-red-500/10' : 'bg-emerald-500/10';
 
+            const hasFile = entry.filepath && entry.filepath.length > 0;
+
             return `
-                <tr class="history-row">
-                    <td class="px-5 py-4 text-sm text-white/90 truncate max-w-xs">${entry.title}</td>
-                    <td class="px-5 py-4 text-sm text-gray-500">${entry.artist}</td>
+                <tr class="history-row group">
+                    <td class="px-5 py-4 text-sm text-white/90 truncate max-w-xs" title="${entry.title}">${entry.title}</td>
+                    <td class="px-5 py-4 text-sm text-gray-500 truncate max-w-[150px]">${entry.artist}</td>
                     <td class="px-5 py-4 text-center">
                         <span class="inline-flex px-2.5 py-1 rounded-md text-[11px] font-bold ${fmtColor} ${fmtBg}">${entry.format}</span>
                     </td>
                     <td class="px-5 py-4 text-sm text-center text-gray-500 font-mono">${size}</td>
-                    <td class="px-5 py-4 text-xs text-gray-600">${entry.date}</td>
+                    <td class="px-5 py-4 text-xs text-gray-600 whitespace-nowrap">${entry.date}</td>
                     <td class="px-5 py-4 text-right">
-                        <button onclick="deleteHistory(${i})" class="text-gray-600 hover:text-red-400 text-xs transition-colors">Eliminar</button>
+                        <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            ${hasFile ? `
+                                <button onclick="openHistoryFile('${entry.filepath.replace(/\\/g, '\\\\')}')" class="history-action-btn" title="Abrir archivo">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </button>
+                                <button onclick="openHistoryFolder('${entry.filepath.replace(/\\/g, '\\\\')}')" class="history-action-btn" title="Abrir carpeta">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                                </button>
+                            ` : ''}
+                            <button onclick="deleteHistory(${i})" class="history-action-btn text-red-400/60 hover:text-red-400" title="Eliminar">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `;
         }).join('');
     } catch (err) {
         console.error('Error loading history:', err);
+    }
+}
+
+// Open file from history
+function openHistoryFile(filepath) {
+    if (filepath) {
+        window.api.openFile(filepath);
+    }
+}
+
+// Open folder from history
+function openHistoryFolder(filepath) {
+    if (filepath) {
+        const sep = filepath.includes('/') ? '/' : '\\';
+        const parts = filepath.split(sep);
+        parts.pop();
+        const folder = parts.join(sep);
+        window.api.openFolder(folder);
     }
 }
 

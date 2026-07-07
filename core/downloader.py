@@ -62,7 +62,8 @@ class TubeToAlbumDownloader:
         filename = filename.replace('%(ext)s', '%(ext)s')
 
         if output_dir:
-            return os.path.join(os.path.expanduser(output_dir), filename)
+            expanded = os.path.expanduser(os.path.expandvars(output_dir))
+            return os.path.normpath(os.path.join(expanded, filename))
         return filename
 
     def get_info(self, url: str) -> Optional[dict]:

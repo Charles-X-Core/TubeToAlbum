@@ -52,3 +52,10 @@ coverage.xml
 *.spec
 dist/
 build/
+
+# Test downloads
+backend/きくお*/
+backend/%USERPROFILE%/
+
+# History (user data)
+history.json
