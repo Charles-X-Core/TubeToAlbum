@@ -1,0 +1,9 @@
+/* Branding overrides for qt-material */
+QLabel#brand-title {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+QLabel#brand-subtitle {
+    font-size: 13px;
+}

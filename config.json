@@ -1,0 +1,37 @@
+{
+  "default_quality": "192",
+  "default_format": "mp3",
+  "output_template": "%(artist|uploader)s/%(album|playlist)s/%(title)s.%(ext)s",
+  "default_output_dir": "~/Music",
+  "non_music_output_dir": "~/Downloads/TubeToAlbum",
+  "non_music_video_subdir": "Videos",
+  "non_music_template": "%(uploader)s/%(title)s.%(ext)s",
+  "video_quality": "best",
+  "ask_format_for_non_music": true,
+  "embed_metadata": true,
+  "embed_thumbnail": true,
+  "overwrite_existing": false,
+  "metadata": {
+    "clean_title": true,
+    "default_genre": "Music",
+    "default_album": "Unknown Album",
+    "default_artist": "Unknown Artist",
+    "title_patterns_to_remove": [
+      "\\(?Official(Music)?Video\\)?",
+      "\\[?Official(Music)?Video\\]?",
+      "\\(?Official Audio\\)?",
+      "\\(?Audio\\)?",
+      "\\(?Video\\)?",
+      "\\[?HD\\]?",
+      "\\[?4K\\]?",
+      "\\[?Lyrics\\]?",
+      "\\(?Lyrics\\)?"
+    ]
+  },
+  "download": {
+    "max_concurrent": 3,
+    "retry_count": 3,
+    "retry_delay": 5,
+    "timeout": 30
+  }
+}
