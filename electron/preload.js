@@ -8,7 +8,11 @@ async function apiCall(endpoint, options = {}) {
         headers: { 'Content-Type': 'application/json' },
         ...options,
     });
-    return response.json();
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.error || `Error ${response.status}`);
+    }
+    return data;
 }
 
 contextBridge.exposeInMainWorld('api', {

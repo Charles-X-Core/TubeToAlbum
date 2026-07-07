@@ -163,6 +163,11 @@ def start_download():
                     'size': file_size,
                     'url': url,
                 }
+
+                for key in ['title', 'artist']:
+                    if entry[key]:
+                        entry[key] = entry[key].encode('utf-8', errors='replace').decode('utf-8', errors='replace')
+
                 history = load_history()
                 history.insert(0, entry)
                 if len(history) > 100:

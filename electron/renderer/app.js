@@ -4,6 +4,28 @@ let currentAnalysis = null;
 let _confirmResolve = null;
 let lastDownloadPath = null;
 
+// Escape HTML to prevent XSS and template breakage
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+// Escape string for use in onclick attribute (JavaScript string literal)
+function escapeJs(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r');
+}
+
 // Custom confirm modal
 function showConfirm(title, msg, btnText = 'Confirmar', type = 'danger') {
     return new Promise(resolve => {
@@ -321,21 +343,30 @@ function resetUI() {
 
 // Load history
 async function loadHistory() {
+    const tbody = document.getElementById('history-table');
+    const empty = document.getElementById('history-empty');
+    const thead = document.getElementById('history-thead');
+    const count = document.getElementById('history-count');
+
     try {
         const history = await window.api.getHistory();
-        const tbody = document.getElementById('history-table');
-        const empty = document.getElementById('history-empty');
-        const count = document.getElementById('history-count');
 
-        count.textContent = `${history.length} descarga${history.length !== 1 ? 's' : ''}`;
+        if (!Array.isArray(history)) {
+            throw new Error('Respuesta invalida del servidor');
+        }
+
+        if (count) count.textContent = `${history.length} descarga${history.length !== 1 ? 's' : ''}`;
 
         if (history.length === 0) {
-            tbody.innerHTML = '';
-            empty.classList.remove('hidden');
+            if (tbody) tbody.innerHTML = '';
+            if (thead) thead.classList.add('hidden');
+            if (empty) empty.classList.remove('hidden');
             return;
         }
 
-        empty.classList.add('hidden');
+        if (empty) empty.classList.add('hidden');
+        if (thead) thead.classList.remove('hidden');
+
         tbody.innerHTML = history.map((entry, i) => {
             const size = entry.size > 1048576
                 ? `${(entry.size / 1048576).toFixed(1)} MB`
@@ -347,23 +378,28 @@ async function loadHistory() {
             const fmtBg = entry.format === 'MP4' ? 'bg-red-500/10' : 'bg-emerald-500/10';
 
             const hasFile = entry.filepath && entry.filepath.length > 0;
+            const safeTitle = escapeHtml(entry.title || 'Sin titulo');
+            const safeArtist = escapeHtml(entry.artist || 'Desconocido');
+            const safeFormat = escapeHtml(entry.format || '?');
+            const safeDate = escapeHtml(entry.date || '');
+            const safeFilepathAttr = hasFile ? escapeJs(entry.filepath) : '';
 
             return `
                 <tr class="history-row group">
-                    <td class="px-5 py-4 text-sm text-white/90 truncate max-w-xs" title="${entry.title}">${entry.title}</td>
-                    <td class="px-5 py-4 text-sm text-gray-500 truncate max-w-[150px]">${entry.artist}</td>
+                    <td class="px-5 py-4 text-sm text-white/90 truncate max-w-xs" title="${safeTitle}">${safeTitle}</td>
+                    <td class="px-5 py-4 text-sm text-gray-500 truncate max-w-[150px]">${safeArtist}</td>
                     <td class="px-5 py-4 text-center">
-                        <span class="inline-flex px-2.5 py-1 rounded-md text-[11px] font-bold ${fmtColor} ${fmtBg}">${entry.format}</span>
+                        <span class="inline-flex px-2.5 py-1 rounded-md text-[11px] font-bold ${fmtColor} ${fmtBg}">${safeFormat}</span>
                     </td>
                     <td class="px-5 py-4 text-sm text-center text-gray-500 font-mono">${size}</td>
-                    <td class="px-5 py-4 text-xs text-gray-600 whitespace-nowrap">${entry.date}</td>
+                    <td class="px-5 py-4 text-xs text-gray-600 whitespace-nowrap">${safeDate}</td>
                     <td class="px-5 py-4 text-right">
                         <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             ${hasFile ? `
-                                <button onclick="openHistoryFile('${entry.filepath.replace(/\\/g, '\\\\')}')" class="history-action-btn" title="Abrir archivo">
+                                <button onclick="openHistoryFile('${safeFilepathAttr}')" class="history-action-btn" title="Abrir archivo">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 </button>
-                                <button onclick="openHistoryFolder('${entry.filepath.replace(/\\/g, '\\\\')}')" class="history-action-btn" title="Abrir carpeta">
+                                <button onclick="openHistoryFolder('${safeFilepathAttr}')" class="history-action-btn" title="Abrir carpeta">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
                                 </button>
                             ` : ''}
@@ -377,6 +413,13 @@ async function loadHistory() {
         }).join('');
     } catch (err) {
         console.error('Error loading history:', err);
+        if (tbody) tbody.innerHTML = '';
+        if (thead) thead.classList.add('hidden');
+        if (empty) {
+            empty.classList.remove('hidden');
+            empty.querySelector('p').textContent = 'Error al cargar historial';
+        }
+        if (count) count.textContent = 'Error';
     }
 }
 
@@ -390,11 +433,8 @@ function openHistoryFile(filepath) {
 // Open folder from history
 function openHistoryFolder(filepath) {
     if (filepath) {
-        const sep = filepath.includes('/') ? '/' : '\\';
-        const parts = filepath.split(sep);
-        parts.pop();
-        const folder = parts.join(sep);
-        window.api.openFolder(folder);
+        const folder = filepath.substring(0, filepath.lastIndexOf('\\') !== -1 ? filepath.lastIndexOf('\\') : filepath.lastIndexOf('/'));
+        if (folder) window.api.openFolder(folder);
     }
 }
 
