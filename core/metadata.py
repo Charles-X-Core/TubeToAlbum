@@ -51,7 +51,7 @@ class MetadataWriter:
             self.write_thumbnail(metadata['thumbnail_data'])
 
     def save(self):
-        self.audio.save()
+        self.audio.save(v2_version=3)
 
     def read(self) -> dict:
         return {
