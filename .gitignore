@@ -56,6 +56,9 @@ build/
 # Test downloads
 backend/きくお*/
 backend/%USERPROFILE%/
+test_thumb/
+test_thumb2/
+test_thumb3/
 
 # History (user data)
 history.json

@@ -43,14 +43,16 @@ def save_history(history):
 
 
 def _crop_and_reembed_thumbnail(audio_path: str, video_url: str = ''):
-    """Download YouTube thumbnail, crop to square, embed into audio file."""
     try:
         thumb_data = None
+        sidecar_path = None
 
         base = os.path.splitext(audio_path)[0]
+
         for ext in ['.jpg', '.webp', '.png', '.jpeg']:
             candidate = base + ext
             if os.path.exists(candidate):
+                sidecar_path = candidate
                 with open(candidate, 'rb') as f:
                     thumb_data = f.read()
                 break
@@ -67,18 +69,19 @@ def _crop_and_reembed_thumbnail(audio_path: str, video_url: str = ''):
 
         cropped = crop_to_square(thumb_data)
 
+        if not os.path.exists(audio_path):
+            return
+
         writer = MetadataWriter(audio_path)
         writer.write_thumbnail(cropped)
         writer.save()
 
-        for ext in ['.jpg', '.webp', '.png', '.jpeg']:
-            candidate = base + ext
-            if os.path.exists(candidate):
-                with open(candidate, 'wb') as f:
-                    f.write(cropped)
-                break
+        if sidecar_path and os.path.exists(sidecar_path):
+            os.remove(sidecar_path)
+
     except Exception as e:
-        print(f"[WARN] Thumbnail crop failed: {e}")
+        import traceback
+        print(f"[THUMB] ERROR: {traceback.format_exc()}", flush=True)
 
 
 @app.route('/api/info', methods=['POST'])
@@ -220,7 +223,7 @@ def start_download():
 
             except Exception as e:
                 import traceback
-                print(f"[ERROR] Download failed: {traceback.format_exc()}")
+                print(f"[ERROR] Download failed: {traceback.format_exc()}", flush=True)
                 jobs[job_id]['status'] = 'error'
                 jobs[job_id]['error'] = str(e)
 
