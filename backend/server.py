@@ -42,34 +42,43 @@ def save_history(history):
         json.dump(history, f, indent=2, ensure_ascii=False)
 
 
-def _crop_and_reembed_thumbnail(audio_path: str):
-    """Find the YouTube thumbnail sidecar file, crop to square, re-embed into audio."""
+def _crop_and_reembed_thumbnail(audio_path: str, video_url: str = ''):
+    """Download YouTube thumbnail, crop to square, embed into audio file."""
     try:
+        thumb_data = None
+
         base = os.path.splitext(audio_path)[0]
-        thumb_path = None
-        for ext in ['.jpg', '.webp', '.png']:
+        for ext in ['.jpg', '.webp', '.png', '.jpeg']:
             candidate = base + ext
             if os.path.exists(candidate):
-                thumb_path = candidate
+                with open(candidate, 'rb') as f:
+                    thumb_data = f.read()
                 break
 
-        if not thumb_path:
+        if not thumb_data and video_url:
+            from core.thumbnail import ThumbnailHandler
+            handler = ThumbnailHandler()
+            video_id = handler.get_video_id(video_url)
+            if video_id:
+                thumb_data = handler.download_best_thumbnail(video_id)
+
+        if not thumb_data:
             return
 
-        with open(thumb_path, 'rb') as f:
-            thumb_data = f.read()
-
         cropped = crop_to_square(thumb_data)
-
-        if cropped != thumb_data:
-            with open(thumb_path, 'wb') as f:
-                f.write(cropped)
 
         writer = MetadataWriter(audio_path)
         writer.write_thumbnail(cropped)
         writer.save()
-    except Exception:
-        pass
+
+        for ext in ['.jpg', '.webp', '.png', '.jpeg']:
+            candidate = base + ext
+            if os.path.exists(candidate):
+                with open(candidate, 'wb') as f:
+                    f.write(cropped)
+                break
+    except Exception as e:
+        print(f"[WARN] Thumbnail crop failed: {e}")
 
 
 @app.route('/api/info', methods=['POST'])
@@ -180,7 +189,7 @@ def start_download():
                 info = info_downloader.get_info(url)
 
                 if filepath and fmt != 'mp4' and os.path.exists(filepath):
-                    _crop_and_reembed_thumbnail(filepath)
+                    _crop_and_reembed_thumbnail(filepath, url)
 
                 file_size = 0
                 if filepath and os.path.exists(filepath):

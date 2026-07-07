@@ -22,9 +22,6 @@ class TubeToAlbumDownloader:
                     'key': 'FFmpegMetadata',
                     'add_metadata': True,
                 },
-                {
-                    'key': 'EmbedThumbnail',
-                },
             ],
             'writethumbnail': True,
             'outtmpl': '%(title)s.%(ext)s',
