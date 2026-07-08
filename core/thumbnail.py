@@ -105,11 +105,24 @@ def crop_thumbnail_file(filepath: str) -> bool:
 
 
 def image_to_ico(image_data: bytes) -> bytes:
+    import struct
     img = Image.open(io.BytesIO(image_data))
     if img.mode != 'RGBA':
         img = img.convert('RGBA')
-    img = img.resize((256, 256), Image.Resampling.LANCZOS)
     sizes = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
-    output = io.BytesIO()
-    img.save(output, format='ICO', sizes=sizes)
-    return output.getvalue()
+    num = len(sizes)
+    header = struct.pack('<HHH', 0, 1, num)
+    data_offset = 6 + (num * 16)
+    chunks = []
+    entries = b''
+    for size in sizes:
+        resized = img.resize(size, Image.Resampling.LANCZOS)
+        w = resized.width if resized.width < 256 else 0
+        h = resized.height if resized.height < 256 else 0
+        buf = io.BytesIO()
+        resized.save(buf, format='PNG')
+        png = buf.getvalue()
+        chunks.append(png)
+        entries += struct.pack('<BBBBHHII', w, h, 0, 0, 1, 32, len(png), data_offset)
+        data_offset += len(png)
+    return header + entries + b''.join(chunks)
