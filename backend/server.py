@@ -58,9 +58,9 @@ def _cleanup_intermediate_files(audio_path: str):
 
 
 def _crop_and_reembed_thumbnail(audio_path: str, video_url: str = ''):
+    sidecar_path = None
     try:
         thumb_data = None
-        sidecar_path = None
 
         base = os.path.splitext(audio_path)[0]
 
@@ -102,6 +102,12 @@ def _crop_and_reembed_thumbnail(audio_path: str, video_url: str = ''):
             f.write(ico_data)
 
         desktop_ini = os.path.join(album_dir, 'desktop.ini')
+        try:
+            import ctypes
+            if os.path.exists(desktop_ini):
+                ctypes.windll.kernel32.SetFileAttributesW(desktop_ini, 0x80)
+        except Exception:
+            pass
         with open(desktop_ini, 'w', encoding='utf-16-le') as f:
             f.write('[.ShellClassInfo]\nIconResource=cover\\folder.ico,0\n')
         try:
@@ -115,19 +121,23 @@ def _crop_and_reembed_thumbnail(audio_path: str, video_url: str = ''):
         except Exception:
             pass
 
-        writer = MetadataWriter(audio_path)
-        writer.write_thumbnail(cropped)
-        writer.save()
+        try:
+            writer = MetadataWriter(audio_path)
+            writer.write_thumbnail(cropped)
+            writer.save()
+        except Exception:
+            import traceback
+            print(f"[THUMB] MetadataWriter ERROR: {traceback.format_exc()}", flush=True)
 
+    except Exception as e:
+        import traceback
+        print(f"[THUMB] ERROR: {traceback.format_exc()}", flush=True)
+    finally:
         if sidecar_path and os.path.exists(sidecar_path):
             try:
                 os.remove(sidecar_path)
             except OSError:
                 pass
-
-    except Exception as e:
-        import traceback
-        print(f"[THUMB] ERROR: {traceback.format_exc()}", flush=True)
 
 
 @app.route('/api/info', methods=['POST'])

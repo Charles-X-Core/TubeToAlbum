@@ -26,6 +26,9 @@ class MetadataWriter:
             self.audio.tags.add(TCON(encoding=3, text=genre))
 
     def write_thumbnail(self, thumbnail_data: bytes):
+        existing = [k for k in self.audio.tags.keys() if k.startswith('APIC')]
+        for k in existing:
+            del self.audio.tags[k]
         self.audio.tags.add(APIC(
             encoding=3,
             mime='image/jpeg',
@@ -51,7 +54,10 @@ class MetadataWriter:
             self.write_thumbnail(metadata['thumbnail_data'])
 
     def save(self):
-        self.audio.save(v2_version=3)
+        try:
+            self.audio.save(self.filepath, v2_version=3)
+        except Exception:
+            self.audio.save(self.filepath, v2_version=4)
 
     def read(self) -> dict:
         return {
