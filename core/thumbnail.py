@@ -102,3 +102,13 @@ def crop_thumbnail_file(filepath: str) -> bool:
         return False
     except Exception:
         return False
+
+
+def image_to_ico(image_data: bytes) -> bytes:
+    img = Image.open(io.BytesIO(image_data))
+    if img.mode != 'RGBA':
+        img = img.convert('RGBA')
+    sizes = [(16, 16), (32, 32), (48, 48), (256, 256)]
+    output = io.BytesIO()
+    img.save(output, format='ICO', sizes=sizes)
+    return output.getvalue()

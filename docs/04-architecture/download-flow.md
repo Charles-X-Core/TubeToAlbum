@@ -69,7 +69,8 @@
 │    - Si no existe, descarga desde YouTube API            │
 │    - Recorta a cuadrado 1:1 (crop_to_square)            │
 │    - Guarda folder.jpg en la carpeta del álbum          │
-│    - Crea desktop.ini (icono de carpeta en Windows)     │
+│    - Convierte a folder.ico (image_to_ico)              │
+│    - Crea desktop.ini apuntando a folder.ico            │
 │    - Embebe APIC en el MP3 (ID3v2.3)                    │
 │    - Elimina archivo sidecar temporal                   │
 └──────────────────────┬──────────────────────────────────┘
@@ -89,7 +90,8 @@
 │    - Archivo guardado en ubicación final                │
 │    - Metadata completa embebida                         │
 │    - Portada embebida en MP3 (APIC, ID3v2.3)           │
-│    - folder.jpg guardado en carpeta del álbum           │
+│    - folder.jpg + folder.ico en carpeta del álbum       │
+│    - desktop.ini con icono de portada                   │
 │    - Listo para reproducir                              │
 └─────────────────────────────────────────────────────────┘
 ```

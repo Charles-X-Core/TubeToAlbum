@@ -77,13 +77,23 @@ def _crop_and_reembed_thumbnail(audio_path: str, video_url: str = ''):
         with open(folder_jpg, 'wb') as f:
             f.write(cropped)
 
+        from core.thumbnail import image_to_ico
+        folder_ico = os.path.join(album_dir, 'folder.ico')
+        ico_data = image_to_ico(cropped)
+        with open(folder_ico, 'wb') as f:
+            f.write(ico_data)
+
         desktop_ini = os.path.join(album_dir, 'desktop.ini')
         with open(desktop_ini, 'w', encoding='utf-16-le') as f:
-            f.write('[.ShellClassInfo]\nIconResource=folder.jpg,0\n')
+            f.write('[.ShellClassInfo]\nIconResource=folder.ico,0\n')
         try:
             import ctypes
             ctypes.windll.kernel32.SetFileAttributesW(desktop_ini, 0x06)
             ctypes.windll.kernel32.SetFileAttributesW(album_dir, 0x01)
+            import subprocess
+            subprocess.run(['powershell', '-Command',
+                          f'Unblock-File -Path "{desktop_ini}"'],
+                         capture_output=True, timeout=5)
         except Exception:
             pass
 

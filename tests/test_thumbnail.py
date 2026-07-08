@@ -1,5 +1,5 @@
 import pytest
-from core.thumbnail import ThumbnailHandler, crop_to_square
+from core.thumbnail import ThumbnailHandler, crop_to_square, image_to_ico
 from PIL import Image
 import io
 
@@ -112,3 +112,41 @@ class TestCropToSquare:
         result = crop_to_square(data)
         img = Image.open(io.BytesIO(result))
         assert img.format == 'JPEG'
+
+
+class TestImageToIco:
+    def _make_image(self, w, h, color='red'):
+        img = Image.new('RGB', (w, h), color=color)
+        output = io.BytesIO()
+        img.save(output, format='JPEG', quality=95)
+        return output.getvalue()
+
+    def test_returns_bytes(self):
+        data = self._make_image(720, 720)
+        result = image_to_ico(data)
+        assert isinstance(result, bytes)
+        assert len(result) > 0
+
+    def test_output_is_ico(self):
+        data = self._make_image(720, 720)
+        result = image_to_ico(data)
+        img = Image.open(io.BytesIO(result))
+        assert img.format == 'ICO'
+
+    def test_ico_sizes(self):
+        data = self._make_image(720, 720)
+        result = image_to_ico(data)
+        img = Image.open(io.BytesIO(result))
+        assert img.size == (256, 256)
+
+    def test_from_jpg(self):
+        data = self._make_image(1920, 1080)
+        result = image_to_ico(data)
+        assert len(result) > 0
+        img = Image.open(io.BytesIO(result))
+        assert img.format == 'ICO'
+
+    def test_from_already_square(self):
+        data = self._make_image(500, 500, 'blue')
+        result = image_to_ico(data)
+        assert len(result) > 0
