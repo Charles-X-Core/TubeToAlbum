@@ -14,8 +14,8 @@
 ### Instalación
 ```bash
 # Clonar
-git clone https://github.com/tubetoalbum/tubetoalbum.git
-cd tubetoalbum
+git clone https://github.com/Charles-X-Core/TubeToAlbum.git
+cd TubeToAlbum
 
 # Instalar dependencias Python
 pip install -r requirements.txt
@@ -25,7 +25,7 @@ pip install -r backend/requirements.txt
 cd electron && npm install && cd ..
 ```
 
-### Ejecutar
+### Ejecutar (Desarrollo)
 ```bash
 # Opción 1: Script automático (Windows)
 start.bat
@@ -44,6 +44,109 @@ python cli/main.py "https://youtube.com/watch?v=..."
 python cli/main.py "URL" --quality 320 --format mp3
 python cli/main.py "URL" --mp4 -y
 ```
+
+---
+
+## 📦 Instalación Rápida (Windows - Installer)
+
+### Descargar Installer
+- **GitHub Releases**: [Descargar `TubeToAlbum Setup 1.0.0.exe`](https://github.com/Charles-X-Core/TubeToAlbum/releases/latest)
+- Tamaño: ~80 MB
+- Incluye: Python 3.11 embebido, FFmpeg, Electron, dependencias
+
+### Instalar
+1. Ejecuta `TubeToAlbum Setup 1.0.0.exe`
+2. Sigue el asistente (NSIS - instala por usuario o sistema)
+3. Lanza desde **Inicio → TubeToAlbum** o acceso directo en Escritorio
+
+### Desinstalar
+- Panel de Control → Programas → TubeToAlbum → Desinstalar
+- O ejecuta `uninstall.exe` en la carpeta de instalación
+
+---
+
+## 🏗️ Build & Distribución (Electron)
+
+### Estructura de Build
+```
+electron/
+├── dist/
+│   ├── win-unpacked/          # App portable (sin installer)
+│   │   ├── TubeToAlbum.exe    # Ejecutable principal (~177 MB)
+│   │   ├── resources/
+│   │   │   ├── backend/       # Python API (Flask)
+│   │   │   ├── core/          # Módulos Python
+│   │   │   └── utils/
+│   │   └── locales/
+│   └── TubeToAlbum Setup 1.0.0.exe   # Installer NSIS (~80 MB)
+├── package.json               # Config Electron + electron-builder
+├── main.js                    # Entry point + spawn backend
+├── preload.js                 # IPC bridge
+├── renderer/                  # UI (HTML/CSS/JS + Tailwind)
+│   ├── index.html
+│   ├── app.js
+│   └── styles.css
+└── assets/
+    ├── icon.ico               # Icono app (256x256)
+    └── installer_header.png   # Header installer (493x58) "by Charles-X-Core"
+```
+
+### Comandos Build
+```bash
+cd electron
+
+# Build desarrollo (desempaquetado)
+npm run build:dir
+
+# Build producción + installer NSIS
+npm run build
+
+# Solo empaquetar (sin installer)
+npm run build:dir
+```
+
+### Configuración electron-builder (`package.json`)
+```json
+{
+  "build": {
+    "appId": "com.tubetoalbum.app",
+    "productName": "TubeToAlbum",
+    "directories": { "output": "dist" },
+    "files": ["main.js", "preload.js", "renderer/**/*", "assets/**/*"],
+    "extraResources": [
+      { "from": "../backend", "to": "backend" },
+      { "from": "../core", "to": "core" },
+      { "from": "../utils", "to": "utils" },
+      { "from": "../requirements.txt", "to": "requirements.txt" },
+      { "from": "../config.json", "to": "config.json" }
+    ],
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/installer_header.png",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "TubeToAlbum"
+    }
+  }
+}
+```
+
+### Detalles Técnicos del Build
+- **Electron**: v28.3.3
+- **electron-builder**: v24.13.3
+- **Target**: NSIS (x64) - Windows 10/11
+- **Arquitectura**: x64
+- **Python embebido**: 3.11 (incluido en resources/backend)
+- **FFmpeg**: Embebido en backend Python
+- **Tamaño installer**: ~80 MB (comprimido NSIS)
+- **Tamaño unpacked**: ~177 MB
 
 ---
 
@@ -103,5 +206,5 @@ Activo - v1.0.0
 ## Tests
 ```bash
 python -m pytest tests/ --tb=short -q
-# 114 tests passing
+# 139 tests passing
 ```

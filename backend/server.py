@@ -22,15 +22,16 @@ CORS(app)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(BASE_DIR, 'config.json')
-HISTORY_PATH = os.path.join(BASE_DIR, 'history.json')
+history_path = os.path.join(os.environ.get('APPDATA', ''), 'TubeToAlbum', 'history.json')
 
 jobs = {}
 
 
 def load_history():
-    if os.path.exists(HISTORY_PATH):
+    os.makedirs(os.path.dirname(history_path), exist_ok=True)
+    if os.path.exists(history_path):
         try:
-            with open(HISTORY_PATH, 'r', encoding='utf-8') as f:
+            with open(history_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except (json.JSONDecodeError, IOError):
             return []
@@ -38,7 +39,8 @@ def load_history():
 
 
 def save_history(history):
-    with open(HISTORY_PATH, 'w', encoding='utf-8') as f:
+    os.makedirs(os.path.dirname(history_path), exist_ok=True)
+    with open(history_path, 'w', encoding='utf-8') as f:
         json.dump(history, f, indent=2, ensure_ascii=False)
 
 
