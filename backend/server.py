@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from core.downloader import TubeToAlbumDownloader
 from core.video_downloader import VideoDownloader
 from core.content_detector import ContentDetector
-from core.thumbnail import crop_to_square
+from core.thumbnail import crop_to_square, prepare_cover
 from core.metadata import MetadataWriter
 from utils.config_utils import load_config, save_config
 from utils.url_utils import is_youtube_url, sanitize_youtube_url
@@ -83,6 +83,7 @@ def _crop_and_reembed_thumbnail(audio_path: str, video_url: str = ''):
             return
 
         cropped = crop_to_square(thumb_data)
+        cover_data = prepare_cover(cropped, target_size=1024)
 
         if not os.path.exists(audio_path):
             return
@@ -93,11 +94,11 @@ def _crop_and_reembed_thumbnail(audio_path: str, video_url: str = ''):
 
         folder_jpg = os.path.join(cover_dir, 'folder.jpg')
         with open(folder_jpg, 'wb') as f:
-            f.write(cropped)
+            f.write(cover_data)
 
         from core.thumbnail import image_to_ico
         folder_ico = os.path.join(cover_dir, 'folder.ico')
-        ico_data = image_to_ico(cropped)
+        ico_data = image_to_ico(cover_data)
         with open(folder_ico, 'wb') as f:
             f.write(ico_data)
 
@@ -123,7 +124,7 @@ def _crop_and_reembed_thumbnail(audio_path: str, video_url: str = ''):
 
         try:
             writer = MetadataWriter(audio_path)
-            writer.write_thumbnail(cropped)
+            writer.write_thumbnail(cover_data)
             writer.save()
         except Exception:
             import traceback

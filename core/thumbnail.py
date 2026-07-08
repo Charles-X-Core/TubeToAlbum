@@ -70,21 +70,38 @@ class ThumbnailHandler:
 
 def crop_to_square(image_data: bytes) -> bytes:
     img = Image.open(io.BytesIO(image_data))
+    if img.mode != 'RGB':
+        img = img.convert('RGB')
     w, h = img.size
 
     if w == h:
-        return image_data
-
-    side = min(w, h)
-    left = (w - side) // 2
-    top = (h - side) // 2
-    right = left + side
-    bottom = top + side
-
-    cropped = img.crop((left, top, right, bottom))
+        cropped = img
+    else:
+        side = min(w, h)
+        left = (w - side) // 2
+        top = (h - side) // 2
+        right = left + side
+        bottom = top + side
+        cropped = img.crop((left, top, right, bottom))
 
     output = io.BytesIO()
     cropped.save(output, format='JPEG', quality=95)
+    return output.getvalue()
+
+
+def prepare_cover(image_data: bytes, target_size: int = 1024) -> bytes:
+    img = Image.open(io.BytesIO(image_data))
+    if img.mode != 'RGB':
+        img = img.convert('RGB')
+
+    if img.size[0] != target_size or img.size[1] != target_size:
+        img = img.resize((target_size, target_size), Image.Resampling.LANCZOS)
+
+    from PIL import ImageFilter
+    img = img.filter(ImageFilter.UnsharpMask(radius=2, percent=100, threshold=3))
+
+    output = io.BytesIO()
+    img.save(output, format='JPEG', quality=95)
     return output.getvalue()
 
 
@@ -109,7 +126,7 @@ def image_to_ico(image_data: bytes) -> bytes:
     img = Image.open(io.BytesIO(image_data))
     if img.mode != 'RGBA':
         img = img.convert('RGBA')
-    sizes = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
+    sizes = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256), (512, 512)]
     num = len(sizes)
     header = struct.pack('<HHH', 0, 1, num)
     data_offset = 6 + (num * 16)
@@ -120,7 +137,7 @@ def image_to_ico(image_data: bytes) -> bytes:
         w = resized.width if resized.width < 256 else 0
         h = resized.height if resized.height < 256 else 0
         buf = io.BytesIO()
-        resized.save(buf, format='PNG')
+        resized.save(buf, format='PNG', optimize=False)
         png = buf.getvalue()
         chunks.append(png)
         entries += struct.pack('<BBBBHHII', w, h, 0, 0, 1, 32, len(png), data_offset)
