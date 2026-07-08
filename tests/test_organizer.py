@@ -31,6 +31,19 @@ class TestFileOrganizer:
         assert organizer.sanitize_filename('Test/File\\Name') == 'TestFileName'
         assert organizer.sanitize_filename('  Test  File  ') == 'Test File'
 
+    def test_sanitize_comma_artist(self):
+        organizer = FileOrganizer(self.config)
+        assert organizer.sanitize_filename('Michael Jackson, Paul McCartney') == 'Michael Jackson'
+
+    def test_sanitize_list_artist(self):
+        organizer = FileOrganizer(self.config)
+        assert organizer.sanitize_filename(['Michael Jackson', 'Paul McCartney']) == 'Michael Jackson'
+
+    def test_sanitize_empty(self):
+        organizer = FileOrganizer(self.config)
+        assert organizer.sanitize_filename('') == ''
+        assert organizer.sanitize_filename(None) == ''
+
     def test_generate_music_filename(self):
         organizer = FileOrganizer(self.config)
         metadata = {

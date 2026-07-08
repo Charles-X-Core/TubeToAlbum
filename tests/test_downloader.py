@@ -76,3 +76,24 @@ class TestTubeToAlbumDownloader:
         assert parsed['title'] is None
         assert parsed['artist'] is None
         assert parsed['album'] is None
+
+    def test_sanitize_comma_artist(self):
+        downloader = TubeToAlbumDownloader(self.config)
+        result = downloader._sanitize('Michael Jackson, Paul McCartney')
+        assert result == 'Michael Jackson'
+
+    def test_sanitize_list_artist(self):
+        downloader = TubeToAlbumDownloader(self.config)
+        result = downloader._sanitize(['Michael Jackson', 'Paul McCartney'])
+        assert result == 'Michael Jackson'
+
+    def test_sanitize_single_artist(self):
+        downloader = TubeToAlbumDownloader(self.config)
+        result = downloader._sanitize('Queen')
+        assert result == 'Queen'
+
+    def test_sanitize_empty(self):
+        downloader = TubeToAlbumDownloader(self.config)
+        assert downloader._sanitize('') == ''
+        assert downloader._sanitize(None) == ''
+        assert downloader._sanitize([]) == ''

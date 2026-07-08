@@ -31,9 +31,12 @@ class TubeToAlbumDownloader:
             'restrictfilenames': True,
         }
 
-    def _sanitize(self, name: str) -> str:
+    def _sanitize(self, name) -> str:
+        if isinstance(name, list):
+            name = name[0] if name else ''
         if not name:
             return ''
+        name = str(name).split(',')[0].strip()
         sanitized = re.sub(r'[<>:"/\\|?*]', '', name)
         sanitized = re.sub(r'\s+', ' ', sanitized).strip()
         sanitized = sanitized.strip('. ')

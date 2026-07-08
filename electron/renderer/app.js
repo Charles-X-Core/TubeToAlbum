@@ -377,6 +377,11 @@ async function loadHistory() {
                     ? `${(entry.size / 1024).toFixed(1)} KB`
                     : entry.size > 0 ? `${entry.size} B` : 'N/A';
 
+            const duration = entry.duration || 0;
+            const mins = Math.floor(duration / 60);
+            const secs = Math.floor(duration % 60);
+            const durationStr = duration > 0 ? `${mins}:${secs.toString().padStart(2, '0')}` : '';
+
             const fmtColor = entry.format === 'MP4' ? 'text-red-400' : 'text-emerald-400';
             const fmtBg = entry.format === 'MP4' ? 'bg-red-500/10' : 'bg-emerald-500/10';
 
@@ -386,17 +391,26 @@ async function loadHistory() {
             const safeFormat = escapeHtml(entry.format || '?');
             const safeDate = escapeHtml(entry.date || '');
             const safeFilepathAttr = hasFile ? escapeJs(entry.filepath) : '';
+            const thumbUrl = entry.thumbnail ? escapeHtml(entry.thumbnail) : '';
 
             return `
                 <tr class="history-row group">
-                    <td class="px-5 py-4 text-sm text-white/90 truncate max-w-xs" title="${safeTitle}">${safeTitle}</td>
-                    <td class="px-5 py-4 text-sm text-gray-500 truncate max-w-[150px]">${safeArtist}</td>
-                    <td class="px-5 py-4 text-center">
+                    <td class="px-5 py-3">
+                        <div class="flex items-center gap-3">
+                            ${thumbUrl ? `<img src="${thumbUrl}" class="w-10 h-10 rounded-lg object-cover bg-dark-750 flex-shrink-0" onerror="this.style.display='none'">` : '<div class="w-10 h-10 rounded-lg bg-dark-750 flex items-center justify-center flex-shrink-0"><svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg></div>'}
+                            <div class="min-w-0">
+                                <p class="text-sm text-white/90 truncate max-w-xs" title="${safeTitle}">${safeTitle}</p>
+                                <p class="text-xs text-gray-500 truncate">${safeArtist}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-5 py-3 text-center">
                         <span class="inline-flex px-2.5 py-1 rounded-md text-[11px] font-bold ${fmtColor} ${fmtBg}">${safeFormat}</span>
                     </td>
-                    <td class="px-5 py-4 text-sm text-center text-gray-500 font-mono">${size}</td>
-                    <td class="px-5 py-4 text-xs text-gray-600 whitespace-nowrap">${safeDate}</td>
-                    <td class="px-5 py-4 text-right">
+                    <td class="px-5 py-3 text-sm text-center text-gray-500 font-mono">${size}</td>
+                    <td class="px-5 py-3 text-sm text-center text-gray-500 font-mono">${durationStr}</td>
+                    <td class="px-5 py-3 text-xs text-gray-600 whitespace-nowrap">${safeDate}</td>
+                    <td class="px-5 py-3 text-right">
                         <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             ${hasFile ? `
                                 <button onclick="openHistoryFile('${safeFilepathAttr}')" class="history-action-btn" title="Abrir archivo">

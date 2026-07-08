@@ -237,6 +237,8 @@ def start_download():
                     'date': datetime.now().strftime('%Y-%m-%d %H:%M'),
                     'size': file_size,
                     'url': url,
+                    'thumbnail': info.get('thumbnail', '') if info else '',
+                    'duration': info.get('duration', 0) if info else 0,
                 }
 
                 for key in ['title', 'artist']:
