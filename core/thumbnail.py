@@ -108,7 +108,8 @@ def image_to_ico(image_data: bytes) -> bytes:
     img = Image.open(io.BytesIO(image_data))
     if img.mode != 'RGBA':
         img = img.convert('RGBA')
-    sizes = [(16, 16), (32, 32), (48, 48), (256, 256)]
+    img = img.resize((256, 256), Image.Resampling.LANCZOS)
+    sizes = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
     output = io.BytesIO()
     img.save(output, format='ICO', sizes=sizes)
     return output.getvalue()
