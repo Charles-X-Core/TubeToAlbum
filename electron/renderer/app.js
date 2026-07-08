@@ -253,6 +253,29 @@ async function startDownload() {
     const quality = document.getElementById('quality-select').value;
     const outputDir = document.getElementById('output-input').value;
 
+    try {
+        const check = await window.api.checkExists({
+            url,
+            format: fmt,
+            output_dir: outputDir,
+            is_music: currentAnalysis.is_music,
+        });
+
+        if (check.exists) {
+            const sizeMB = check.size > 1048576 ? (check.size / 1048576).toFixed(1) + ' MB' : check.size + ' bytes';
+            await showConfirm(
+                'Archivo existente',
+                `Ya descargaste esta cancion (${sizeMB}). Si la descargas de nuevo se rompe la portada.`,
+                'Entendido',
+                'info'
+            );
+            resetUI();
+            return;
+        }
+    } catch (e) {
+        // ignore check errors, proceed with download
+    }
+
     document.getElementById('download-btn').classList.add('hidden');
     document.getElementById('cancel-btn').classList.remove('hidden');
     document.getElementById('progress-status').textContent = 'Iniciando descarga...';

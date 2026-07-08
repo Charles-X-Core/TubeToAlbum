@@ -42,6 +42,21 @@ def save_history(history):
         json.dump(history, f, indent=2, ensure_ascii=False)
 
 
+def _cleanup_intermediate_files(audio_path: str):
+    try:
+        album_dir = os.path.dirname(audio_path)
+        base = os.path.splitext(audio_path)[0]
+        for ext in ['.webm', '.webp', '.opus', '.ogg', '.m4a', '.wav', '.aac']:
+            candidate = base + ext
+            if os.path.exists(candidate):
+                try:
+                    os.remove(candidate)
+                except OSError:
+                    pass
+    except Exception:
+        pass
+
+
 def _crop_and_reembed_thumbnail(audio_path: str, video_url: str = ''):
     try:
         thumb_data = None
@@ -105,7 +120,10 @@ def _crop_and_reembed_thumbnail(audio_path: str, video_url: str = ''):
         writer.save()
 
         if sidecar_path and os.path.exists(sidecar_path):
-            os.remove(sidecar_path)
+            try:
+                os.remove(sidecar_path)
+            except OSError:
+                pass
 
     except Exception as e:
         import traceback
@@ -137,6 +155,43 @@ def get_info():
         return jsonify({'info': info, 'analysis': analysis})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/check-exists', methods=['POST'])
+def check_exists():
+    try:
+        data = request.json
+        url = data.get('url', '')
+        fmt = data.get('format', 'mp3')
+        output_dir = data.get('output_dir', '')
+        is_music = data.get('is_music', True)
+
+        url = sanitize_youtube_url(url)
+        downloader = TubeToAlbumDownloader({'quiet': True})
+        info = downloader.get_info(url)
+        if not info:
+            return jsonify({'exists': False})
+
+        config = {
+            'format': fmt,
+            'output': {'output_dir': output_dir, 'output_template': '%(artist|uploader)s/%(album|playlist)s/%(title)s.%(ext)s'},
+            'default_output_dir': output_dir or os.path.expanduser('~/Music'),
+            'non_music_output_dir': output_dir or os.path.expanduser('~/Downloads/TubeToAlbum'),
+        }
+        dl = TubeToAlbumDownloader(config)
+        expected = dl._build_output_path(info, is_music)
+        real_path = os.path.normpath(expected.replace('%(ext)s', fmt))
+
+        if os.path.exists(real_path):
+            file_size = 0
+            try:
+                file_size = os.path.getsize(real_path)
+            except OSError:
+                pass
+            return jsonify({'exists': True, 'filepath': real_path, 'size': file_size})
+        return jsonify({'exists': False})
+    except Exception as e:
+        return jsonify({'exists': False, 'error': str(e)})
 
 
 @app.route('/api/download', methods=['POST'])
@@ -183,7 +238,6 @@ def start_download():
 
             elif d['status'] == 'finished':
                 jobs[job_id]['progress'] = 100
-                jobs[job_id]['status'] = 'completed'
 
         def run_download():
             try:
@@ -212,15 +266,17 @@ def start_download():
                 if filepath:
                     filepath = os.path.normpath(filepath)
 
-                jobs[job_id]['filepath'] = filepath or ''
-                jobs[job_id]['status'] = 'completed'
-                jobs[job_id]['progress'] = 100
+                if filepath and fmt != 'mp4' and is_music and os.path.exists(filepath):
+                    _crop_and_reembed_thumbnail(filepath, url)
+
+                _cleanup_intermediate_files(filepath or '')
 
                 info_downloader = TubeToAlbumDownloader({'quiet': True})
                 info = info_downloader.get_info(url)
 
-                if filepath and fmt != 'mp4' and is_music and os.path.exists(filepath):
-                    _crop_and_reembed_thumbnail(filepath, url)
+                jobs[job_id]['filepath'] = filepath or ''
+                jobs[job_id]['status'] = 'completed'
+                jobs[job_id]['progress'] = 100
 
                 file_size = 0
                 if filepath and os.path.exists(filepath):

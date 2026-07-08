@@ -26,6 +26,11 @@ contextBridge.exposeInMainWorld('api', {
         body: JSON.stringify(data),
     }),
 
+    checkExists: (data) => apiCall('/api/check-exists', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    }),
+
     getProgress: (jobId) => apiCall(`/api/progress/${jobId}`),
 
     cancelDownload: (jobId) => apiCall(`/api/cancel/${jobId}`, {
