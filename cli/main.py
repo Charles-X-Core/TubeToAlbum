@@ -197,7 +197,7 @@ Ejemplos:
 
     downloader_config = {
         'format': config.get('default_format', 'mp3'),
-        'quality': config.get('default_quality', '192'),
+        'quality': config.get('default_quality', '320'),
         'output': {
             'output_template': config.get('output_template'),
             'output_dir': config.get('default_output_dir'),
@@ -260,7 +260,7 @@ Ejemplos:
             quality = args.quality
         elif args.no_interactive:
             format_choice = config.get('default_format', 'mp3')
-            quality = config.get('default_quality', '192')
+            quality = config.get('default_quality', '320')
         else:
             format_choice, quality = ask_format_and_quality(analysis['is_music'])
 

@@ -40,7 +40,7 @@ class SettingsTab(QWidget):
         self.quality_combo.addItems(["128", "192", "256", "320"])
         self.quality_combo.setMinimumHeight(48)
         self.quality_combo.setFont(QFont("Segoe UI", 14))
-        current_quality = self.config.get('default_quality', '192')
+        current_quality = self.config.get('default_quality', '320')
         idx = self.quality_combo.findText(current_quality)
         if idx >= 0:
             self.quality_combo.setCurrentIndex(idx)
@@ -207,7 +207,7 @@ class SettingsTab(QWidget):
         )
         if reply == QMessageBox.Yes:
             self.config = DEFAULT_CONFIG.copy()
-            self.quality_combo.setCurrentText(self.config.get('default_quality', '192'))
+            self.quality_combo.setCurrentText(self.config.get('default_quality', '320'))
             self.format_combo.setCurrentText(self.config.get('default_format', 'mp3'))
             self.music_input.setText(os.path.expanduser(self.config.get('default_output_dir', '~/Music')))
             self.other_input.setText(

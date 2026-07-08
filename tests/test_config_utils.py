@@ -15,7 +15,7 @@ class TestConfigUtils:
 
     def test_load_config_default(self):
         config = load_config()
-        assert config['default_quality'] == '192'
+        assert config['default_quality'] == '320'
         assert config['default_format'] == 'mp3'
 
     def test_load_config_from_file(self):
@@ -34,7 +34,7 @@ class TestConfigUtils:
 
     def test_load_config_nonexistent(self):
         config = load_config('/nonexistent/config.json')
-        assert config['default_quality'] == '192'
+        assert config['default_quality'] == '320'
 
     def test_save_config(self):
         config_path = os.path.join(self.temp_dir, 'config.json')

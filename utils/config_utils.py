@@ -4,7 +4,7 @@ from typing import Optional
 
 
 DEFAULT_CONFIG = {
-    'default_quality': '192',
+    'default_quality': '320',
     'default_format': 'mp3',
     'output_template': '%(artist|uploader)s/%(album|playlist)s/%(title)s.%(ext)s',
     'default_output_dir': '~/Music',

@@ -224,8 +224,8 @@ function onFormatChange() {
             opt.textContent = q;
             qualitySelect.appendChild(opt);
         });
-        qualitySelect.value = '720';
-        bitrateDisplay.textContent = '720p';
+        qualitySelect.value = '1080';
+        bitrateDisplay.textContent = '1080p';
         document.getElementById('output-input').value = '%USERPROFILE%\\Downloads\\TubeToAlbum';
     } else {
         ['128', '192', '256', '320'].forEach(q => {
@@ -234,8 +234,8 @@ function onFormatChange() {
             opt.textContent = `${q} kbps`;
             qualitySelect.appendChild(opt);
         });
-        qualitySelect.value = '192';
-        bitrateDisplay.textContent = '192 kbps';
+        qualitySelect.value = '320';
+        bitrateDisplay.textContent = '320 kbps';
         document.getElementById('output-input').value = '%USERPROFILE%\\Music';
 
         qualitySelect.onchange = () => {
@@ -462,7 +462,7 @@ async function clearHistory() {
 async function loadSettings() {
     try {
         const config = await window.api.getConfig();
-        document.getElementById('cfg-quality').value = config.default_quality || '192';
+        document.getElementById('cfg-quality').value = config.default_quality || '320';
         document.getElementById('cfg-format').value = config.default_format || 'mp3';
         document.getElementById('cfg-music-dir').value = config.default_output_dir || '~/Music';
         document.getElementById('cfg-other-dir').value = config.non_music_output_dir || '~/Downloads/TubeToAlbum';
@@ -499,7 +499,7 @@ async function saveSettings() {
 async function resetSettings() {
     const ok = await showConfirm('Restablecer configuración', 'Se perderán todos los ajustes personalizados y volverán a los valores por defecto.', 'Restablecer', 'danger');
     if (ok) {
-        document.getElementById('cfg-quality').value = '192';
+        document.getElementById('cfg-quality').value = '320';
         document.getElementById('cfg-format').value = 'mp3';
         document.getElementById('cfg-music-dir').value = '~/Music';
         document.getElementById('cfg-other-dir').value = '~/Downloads/TubeToAlbum';
