@@ -73,19 +73,22 @@ def _crop_and_reembed_thumbnail(audio_path: str, video_url: str = ''):
             return
 
         album_dir = os.path.dirname(audio_path)
-        folder_jpg = os.path.join(album_dir, 'folder.jpg')
+        cover_dir = os.path.join(album_dir, 'cover')
+        os.makedirs(cover_dir, exist_ok=True)
+
+        folder_jpg = os.path.join(cover_dir, 'folder.jpg')
         with open(folder_jpg, 'wb') as f:
             f.write(cropped)
 
         from core.thumbnail import image_to_ico
-        folder_ico = os.path.join(album_dir, 'folder.ico')
+        folder_ico = os.path.join(cover_dir, 'folder.ico')
         ico_data = image_to_ico(cropped)
         with open(folder_ico, 'wb') as f:
             f.write(ico_data)
 
         desktop_ini = os.path.join(album_dir, 'desktop.ini')
         with open(desktop_ini, 'w', encoding='utf-16-le') as f:
-            f.write('[.ShellClassInfo]\nIconResource=folder.ico,0\n')
+            f.write('[.ShellClassInfo]\nIconResource=cover\\folder.ico,0\n')
         try:
             import ctypes
             ctypes.windll.kernel32.SetFileAttributesW(desktop_ini, 0x06)

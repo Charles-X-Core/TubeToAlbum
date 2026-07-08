@@ -46,20 +46,23 @@ Music/
 ├── Queen/
 │   ├── A Night at the Opera/
 │   │   ├── Bohemian Rhapsody.mp3
-│   │   ├── folder.jpg          # Portada del álbum
-│   │   ├── folder.ico          # Icono de la portada
+│   │   ├── cover/
+│   │   │   ├── folder.jpg      # Portada del álbum
+│   │   │   └── folder.ico      # Icono de la portada
 │   │   ├── desktop.ini         # Icono de carpeta en Windows
 │   │   └── ...
 │   └── The Game/
 │       ├── Another One Bites the Dust.mp3
-│       ├── folder.jpg
-│       ├── folder.ico
+│       ├── cover/
+│       │   ├── folder.jpg
+│       │   └── folder.ico
 │       └── desktop.ini
 ├── Led Zeppelin/
 │   └── Led Zeppelin IV/
 │       ├── Stairway to Heaven.mp3
-│       ├── folder.jpg
-│       ├── folder.ico
+│       ├── cover/
+│       │   ├── folder.jpg
+│       │   └── folder.ico
 │       └── desktop.ini
 └── ...
 

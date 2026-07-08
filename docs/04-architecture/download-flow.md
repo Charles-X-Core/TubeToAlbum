@@ -68,9 +68,10 @@
 │    - Busca sidecar (.webp/.jpg/.png) junto al MP3      │
 │    - Si no existe, descarga desde YouTube API            │
 │    - Recorta a cuadrado 1:1 (crop_to_square)            │
-│    - Guarda folder.jpg en la carpeta del álbum          │
-│    - Convierte a folder.ico (image_to_ico)              │
-│    - Crea desktop.ini apuntando a folder.ico            │
+│    - Crea carpeta cover/ en el álbum                    │
+│    - Guarda cover/folder.jpg (portada JPEG)             │
+│    - Convierte a cover/folder.ico (image_to_ico)        │
+│    - Crea desktop.ini apuntando a cover/folder.ico      │
 │    - Embebe APIC en el MP3 (ID3v2.3)                    │
 │    - Elimina archivo sidecar temporal                   │
 └──────────────────────┬──────────────────────────────────┘
