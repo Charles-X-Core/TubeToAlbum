@@ -1,6 +1,6 @@
 # TubeToAlbum
 
-> Descargador profesional de YouTube a MP3/MP4 para PC con metadata completa, portadas embebidas y organización en carpetas.
+> Descargador profesional de YouTube a MP3/MP4 para PC con metadata completa, portadas embebidas (APIC + folder.jpg) y organización en carpetas.
 
 ---
 
@@ -103,5 +103,5 @@ Activo - v1.0.0
 ## Tests
 ```bash
 python -m pytest tests/ --tb=short -q
-# 106 tests passing
+# 114 tests passing
 ```

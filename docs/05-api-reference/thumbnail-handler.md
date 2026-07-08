@@ -32,7 +32,7 @@ class ThumbnailHandler:
         # youtu.be/VIDEO_ID
         # youtube.com/embed/VIDEO_ID
         patterns = [
-            r'(?:v=|/v/|youtu\.be/)([a-zA-Z0-9_-]{11})',
+            r'(?:v=|/v/|youtu\.be/|/embed/)([a-zA-Z0-9_-]{11})',
         ]
         
         for pattern in patterns:

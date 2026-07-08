@@ -64,10 +64,14 @@
                        ▼
 ┌─────────────────────────────────────────────────────────┐
 │ 8. EMBEBED DE PORTADA                                   │
-│    Mutagen escribe frame APIC:                          │
-│    - Descarga thumbnail de YouTube                      │
-│    - Convierte a JPEG si es necesario                   │
-│    - Embebe en el MP3                                   │
+│    _crop_and_reembed_thumbnail():                        │
+│    - Busca sidecar (.webp/.jpg/.png) junto al MP3      │
+│    - Si no existe, descarga desde YouTube API            │
+│    - Recorta a cuadrado 1:1 (crop_to_square)            │
+│    - Guarda folder.jpg en la carpeta del álbum          │
+│    - Crea desktop.ini (icono de carpeta en Windows)     │
+│    - Embebe APIC en el MP3 (ID3v2.3)                    │
+│    - Elimina archivo sidecar temporal                   │
 └──────────────────────┬──────────────────────────────────┘
                        │
                        ▼
@@ -84,7 +88,8 @@
 │ 10. COMPLETADO                                          │
 │    - Archivo guardado en ubicación final                │
 │    - Metadata completa embebida                         │
-│    - Portada visible en reproductores                   │
+│    - Portada embebida en MP3 (APIC, ID3v2.3)           │
+│    - folder.jpg guardado en carpeta del álbum           │
 │    - Listo para reproducir                              │
 └─────────────────────────────────────────────────────────┘
 ```

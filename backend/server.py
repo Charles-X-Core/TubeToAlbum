@@ -72,6 +72,21 @@ def _crop_and_reembed_thumbnail(audio_path: str, video_url: str = ''):
         if not os.path.exists(audio_path):
             return
 
+        album_dir = os.path.dirname(audio_path)
+        folder_jpg = os.path.join(album_dir, 'folder.jpg')
+        with open(folder_jpg, 'wb') as f:
+            f.write(cropped)
+
+        desktop_ini = os.path.join(album_dir, 'desktop.ini')
+        with open(desktop_ini, 'w', encoding='utf-16-le') as f:
+            f.write('[.ShellClassInfo]\nIconResource=folder.jpg,0\n')
+        try:
+            import ctypes
+            ctypes.windll.kernel32.SetFileAttributesW(desktop_ini, 0x06)
+            ctypes.windll.kernel32.SetFileAttributesW(album_dir, 0x01)
+        except Exception:
+            pass
+
         writer = MetadataWriter(audio_path)
         writer.write_thumbnail(cropped)
         writer.save()

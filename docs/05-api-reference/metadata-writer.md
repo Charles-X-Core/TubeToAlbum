@@ -16,10 +16,8 @@ class MetadataWriter:
         self.filepath = filepath
         self.audio = MP3(filepath, ID3=ID3)
         
-        try:
+        if self.audio.tags is None:
             self.audio.add_tags()
-        except:
-            pass
     
     def write_basic(self, title, artist, album):
         """
@@ -88,8 +86,8 @@ class MetadataWriter:
             self.write_thumbnail(metadata['thumbnail_data'])
     
     def save(self):
-        """Guardar cambios en el archivo."""
-        self.audio.save()
+        """Guardar cambios en el archivo (ID3v2.3 para compatibilidad)."""
+        self.audio.save(v2_version=3)
     
     def read(self):
         """

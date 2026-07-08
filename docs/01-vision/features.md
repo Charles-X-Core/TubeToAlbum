@@ -35,7 +35,9 @@
 - **Año**: Fecha de subida del video
 - **Género**: Categorías de YouTube
 - **Número de pista**: Índice en la playlist
-- **Portada**: Thumbnail embebido como APIC
+- **Portada**: Thumbnail recortado a 1:1, embebido como APIC (ID3v2.3)
+- **folder.jpg**: Imagen de portada guardada en la carpeta del álbum
+- **desktop.ini**: Configuración para que Windows Explorer muestre la portada como icono de la carpeta
 
 ## Organización de Archivos
 ```
@@ -43,12 +45,18 @@ Music/
 ├── Queen/
 │   ├── A Night at the Opera/
 │   │   ├── Bohemian Rhapsody.mp3
+│   │   ├── folder.jpg          # Portada del álbum
+│   │   ├── desktop.ini         # Icono de carpeta en Windows
 │   │   └── ...
 │   └── The Game/
-│       └── Another One Bites the Dust.mp3
+│       ├── Another One Bites the Dust.mp3
+│       ├── folder.jpg
+│       └── desktop.ini
 ├── Led Zeppelin/
 │   └── Led Zeppelin IV/
-│       └── Stairway to Heaven.mp3
+│       ├── Stairway to Heaven.mp3
+│       ├── folder.jpg
+│       └── desktop.ini
 └── ...
 
 Downloads/TubeToAlbum/    # Contenido no-música
