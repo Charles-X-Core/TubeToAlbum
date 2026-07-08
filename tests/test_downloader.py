@@ -97,3 +97,38 @@ class TestTubeToAlbumDownloader:
         assert downloader._sanitize('') == ''
         assert downloader._sanitize(None) == ''
         assert downloader._sanitize([]) == ''
+
+    def test_sanitize_artist_feat(self):
+        downloader = TubeToAlbumDownloader(self.config)
+        assert downloader._sanitize_artist('MYTH & ROID feat. TK (凛として時雨)') == 'MYTH & ROID'
+
+    def test_sanitize_artist_ft(self):
+        downloader = TubeToAlbumDownloader(self.config)
+        assert downloader._sanitize_artist('Eve ft. Takayan') == 'Eve'
+
+    def test_sanitize_artist_featuring(self):
+        downloader = TubeToAlbumDownloader(self.config)
+        assert downloader._sanitize_artist('Artist One featuring Artist Two') == 'Artist One'
+
+    def test_sanitize_artist_comma(self):
+        downloader = TubeToAlbumDownloader(self.config)
+        assert downloader._sanitize_artist('Michael Jackson, Paul McCartney') == 'Michael Jackson'
+
+    def test_sanitize_artist_list(self):
+        downloader = TubeToAlbumDownloader(self.config)
+        assert downloader._sanitize_artist(['Queen', 'David Bowie']) == 'Queen'
+
+    def test_sanitize_artist_plain(self):
+        downloader = TubeToAlbumDownloader(self.config)
+        assert downloader._sanitize_artist('Konomi Suzuki') == 'Konomi Suzuki'
+
+    def test_sanitize_artist_empty(self):
+        downloader = TubeToAlbumDownloader(self.config)
+        assert downloader._sanitize_artist('') == ''
+        assert downloader._sanitize_artist(None) == ''
+        assert downloader._sanitize_artist([]) == ''
+
+    def test_sanitize_artist_feat_case_insensitive(self):
+        downloader = TubeToAlbumDownloader(self.config)
+        assert downloader._sanitize_artist('Artist FEAT. Other') == 'Artist'
+        assert downloader._sanitize_artist('Artist Ft. Other') == 'Artist'

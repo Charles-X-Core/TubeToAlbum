@@ -42,6 +42,19 @@ class TubeToAlbumDownloader:
         sanitized = sanitized.strip('. ')
         return sanitized
 
+    def _sanitize_artist(self, name) -> str:
+        if isinstance(name, list):
+            name = name[0] if name else ''
+        if not name:
+            return ''
+        name = str(name)
+        name = re.split(r'\s*[,]\s*', name)[0].strip()
+        name = re.split(r'\s+(?:feat\.|ft\.|featuring)\s+', name, flags=re.IGNORECASE)[0].strip()
+        sanitized = re.sub(r'[<>:"/\\|?*]', '', name)
+        sanitized = re.sub(r'\s+', ' ', sanitized).strip()
+        sanitized = sanitized.strip('. ')
+        return sanitized
+
     def _build_output_path(self, info: dict, is_music: bool = True) -> str:
         if is_music:
             output_dir = self.config.get('output', {}).get('output_dir') or self.config.get('default_output_dir', '')
@@ -50,7 +63,7 @@ class TubeToAlbumDownloader:
             output_dir = self.config.get('non_music_output_dir', '~/Downloads/TubeToAlbum')
             output_template = '%(title)s.%(ext)s'
 
-        artist = self._sanitize(info.get('artist') or info.get('uploader', 'Unknown Artist'))
+        artist = self._sanitize_artist(info.get('artist') or info.get('uploader', 'Unknown Artist'))
         album = self._sanitize(info.get('album') or info.get('playlist', 'Unknown Album'))
         title = self._sanitize(info.get('title', 'Unknown Title'))
         ext = self.config.get('format', 'mp3')

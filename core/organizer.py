@@ -26,10 +26,23 @@ class FileOrganizer:
         sanitized = sanitized.strip('. ')
         return sanitized
 
+    def sanitize_artist(self, name) -> str:
+        if isinstance(name, list):
+            name = name[0] if name else ''
+        if not name:
+            return ''
+        name = str(name)
+        name = re.split(r'\s*[,]\s*', name)[0].strip()
+        name = re.split(r'\s+(?:feat\.|ft\.|featuring)\s+', name, flags=re.IGNORECASE)[0].strip()
+        sanitized = re.sub(r'[<>:"/\\|?*]', '', name)
+        sanitized = re.sub(r'\s+', ' ', sanitized).strip()
+        sanitized = sanitized.strip('. ')
+        return sanitized
+
     def generate_music_filename(self, metadata: dict) -> str:
         template = self.output_template
 
-        artist = self.sanitize_filename(metadata.get('artist', 'Unknown Artist'))
+        artist = self.sanitize_artist(metadata.get('artist', 'Unknown Artist'))
         album = self.sanitize_filename(metadata.get('album', 'Unknown Album'))
         title = self.sanitize_filename(metadata.get('title', 'Unknown Title'))
         ext = metadata.get('ext', 'mp3')

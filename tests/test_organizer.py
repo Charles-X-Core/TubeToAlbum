@@ -44,6 +44,27 @@ class TestFileOrganizer:
         assert organizer.sanitize_filename('') == ''
         assert organizer.sanitize_filename(None) == ''
 
+    def test_sanitize_artist_feat(self):
+        organizer = FileOrganizer(self.config)
+        assert organizer.sanitize_artist('MYTH & ROID feat. TK (凛として時雨)') == 'MYTH & ROID'
+
+    def test_sanitize_artist_ft(self):
+        organizer = FileOrganizer(self.config)
+        assert organizer.sanitize_artist('Eve ft. Takayan') == 'Eve'
+
+    def test_sanitize_artist_featuring(self):
+        organizer = FileOrganizer(self.config)
+        assert organizer.sanitize_artist('Artist One featuring Artist Two') == 'Artist One'
+
+    def test_sanitize_artist_plain(self):
+        organizer = FileOrganizer(self.config)
+        assert organizer.sanitize_artist('Konomi Suzuki') == 'Konomi Suzuki'
+
+    def test_sanitize_artist_empty(self):
+        organizer = FileOrganizer(self.config)
+        assert organizer.sanitize_artist('') == ''
+        assert organizer.sanitize_artist(None) == ''
+
     def test_generate_music_filename(self):
         organizer = FileOrganizer(self.config)
         metadata = {
