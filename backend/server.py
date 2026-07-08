@@ -238,6 +238,9 @@ def start_download():
 
             elif d['status'] == 'finished':
                 jobs[job_id]['progress'] = 100
+            elif d['status'] == 'error':
+                jobs[job_id]['status'] = 'error'
+                jobs[job_id]['error'] = str(d.get('error', 'Error de descarga'))
 
         def run_download():
             try:
@@ -266,10 +269,15 @@ def start_download():
                 if filepath:
                     filepath = os.path.normpath(filepath)
 
-                if filepath and fmt != 'mp4' and is_music and os.path.exists(filepath):
+                if not filepath or not os.path.exists(filepath):
+                    jobs[job_id]['status'] = 'error'
+                    jobs[job_id]['error'] = 'No se pudo descargar el archivo'
+                    return
+
+                if fmt != 'mp4' and is_music:
                     _crop_and_reembed_thumbnail(filepath, url)
 
-                _cleanup_intermediate_files(filepath or '')
+                _cleanup_intermediate_files(filepath)
 
                 info_downloader = TubeToAlbumDownloader({'quiet': True})
                 info = info_downloader.get_info(url)

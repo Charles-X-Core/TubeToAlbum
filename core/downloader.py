@@ -106,11 +106,20 @@ class TubeToAlbumDownloader:
             with yt_dlp.YoutubeDL(self.ydl_opts) as ydl2:
                 ydl2.download([url])
 
+        import time
         final_ext = self.config.get('format', 'mp3')
         real_path = output_path.replace('%(ext)s', final_ext)
+        for _ in range(30):
+            if os.path.exists(real_path):
+                break
+            time.sleep(1)
         if not os.path.exists(real_path):
             orig_ext = info.get('ext', 'webm')
             real_path = output_path.replace('%(ext)s', orig_ext)
+            for _ in range(10):
+                if os.path.exists(real_path):
+                    break
+                time.sleep(1)
         return real_path
 
     def download_playlist(self, playlist_url: str, progress_callback: Optional[Callable] = None) -> list:
@@ -123,13 +132,7 @@ class TubeToAlbumDownloader:
             ydl.download([playlist_url])
 
     def _progress_hook(self, d: dict):
-        if d['status'] == 'downloading':
-            percent = d.get('_percent_str', '0%')
-            speed = d.get('_speed_str', 'N/A')
-            eta = d.get('_eta_str', 'N/A')
-            print(f"\r{percent} | Speed: {speed} | ETA: {eta}", end='')
-        elif d['status'] == 'finished':
-            print("\n¡Descarga completada!")
+        pass
 
     def _parse_info(self, info: dict) -> dict:
         return {
