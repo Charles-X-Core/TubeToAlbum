@@ -65,10 +65,11 @@
       "allowToChangeInstallationDirectory": true,
       "installerIcon": "assets/icon.ico",
       "uninstallerIcon": "assets/icon.ico",
-      "installerHeaderIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/installer_header.png",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "TubeToAlbum"
+      "shortcutName": "TubeToAlbum",
+      "publisherName": "Charles-X-Core"
     }
   }
 }
