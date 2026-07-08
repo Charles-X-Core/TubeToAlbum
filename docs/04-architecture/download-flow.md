@@ -63,8 +63,9 @@
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────┐
-│ 8. EMBEBED DE PORTADA                                   │
+│ 8. EMBEBED DE PORTADA (solo música)                     │
 │    _crop_and_reembed_thumbnail():                        │
+│    - Solo se ejecuta si is_music=true                   │
 │    - Busca sidecar (.webp/.jpg/.png) junto al MP3      │
 │    - Si no existe, descarga desde YouTube API            │
 │    - Recorta a cuadrado 1:1 (crop_to_square)            │

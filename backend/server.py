@@ -219,7 +219,7 @@ def start_download():
                 info_downloader = TubeToAlbumDownloader({'quiet': True})
                 info = info_downloader.get_info(url)
 
-                if filepath and fmt != 'mp4' and os.path.exists(filepath):
+                if filepath and fmt != 'mp4' and is_music and os.path.exists(filepath):
                     _crop_and_reembed_thumbnail(filepath, url)
 
                 file_size = 0
